@@ -24,6 +24,11 @@ async function initUI() {
 	
 	tabVoice.addEventListener('click', () => switchTab('voice'));
 	tabChat.addEventListener('click', () => switchTab('chat'));
+	// New conversation
+	const newBtn = document.getElementById('new-btn');
+	if (newBtn) {
+		newBtn.addEventListener('click', resetConversation);
+	}
 	
 	function switchTab(tab) {
 		currentTab = tab;
@@ -46,6 +51,25 @@ async function initUI() {
 			voicePane.classList.remove('active');
 		}
 	}
+}
+
+async function resetConversation() {
+	// stop any ongoing speech
+	if (synth) { try { synth.cancel(); } catch(e) {} }
+	isSpeaking = false;
+	isPaused = false;
+	// clear chat UI
+	const messagesContainer = document.getElementById('chat-messages');
+	if (messagesContainer) messagesContainer.innerHTML = '';
+	// reset server-side conversation
+	try {
+		await fetch('/api/reset', { method: 'POST' });
+	} catch (e) {
+		console.warn('Reset failed:', e);
+	}
+	// go back to Voice tab as default
+	const tv = document.getElementById('tab-voice');
+	if (tv) tv.click();
 }
 
 function preloadVoiceGifs() {

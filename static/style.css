@@ -83,6 +83,11 @@ body {
 	cursor: pointer;
 	transition: all 0.2s ease;
 }
+.tab:hover {
+	filter: brightness(1.06);
+	transform: translateY(-2px);
+	box-shadow: 0 10px 24px rgba(99, 102, 241, 0.25);
+}
 .tab.active {
 	background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
 	border-color: transparent;
@@ -234,6 +239,14 @@ body {
     border: 1px solid var(--border);
     border-bottom-left-radius: 4px;
 }
+/* Subtle hover for bubbles */
+.message .message-content {
+	transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.message:hover .message-content {
+	transform: translateY(-1px);
+	box-shadow: 0 6px 14px rgba(2, 6, 23, 0.35);
+}
 
 .input-section {
     margin-top: 20px;
@@ -266,6 +279,12 @@ body {
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
+.text-input:hover {
+	border-color: rgba(99, 102, 241, 0.6);
+	box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.08);
+	transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
 .text-input::placeholder {
     color: var(--text-muted);
 }
@@ -288,15 +307,16 @@ body {
 .voice-btn {
 	width: 64px;
 	height: 64px;
+	transition: transform 0.2s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
 
 .voice-btn:hover, .send-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 28px rgba(99, 102, 241, 0.45);
 }
 
 .voice-btn:active, .send-btn:active {
-    transform: translateY(0);
+    transform: translateY(0) scale(0.98);
 }
 
 .voice-btn.listening {
@@ -316,6 +336,22 @@ body {
 .voice-btn svg, .send-btn svg {
     width: 24px;
     height: 24px;
+}
+
+/* Generic control button (mute/next) states */
+.control-btn {
+	transition: transform 0.2s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+.control-btn:hover {
+	transform: translateY(-2px) scale(1.02);
+	box-shadow: 0 8px 22px rgba(2, 6, 23, 0.35);
+}
+.control-btn:active {
+	transform: translateY(0) scale(0.98);
+}
+.control-btn.active:hover {
+	filter: brightness(1.05);
+	box-shadow: 0 8px 22px rgba(239, 68, 68, 0.35);
 }
 
 /* Generic control button (mute/next) */

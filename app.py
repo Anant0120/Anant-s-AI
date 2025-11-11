@@ -91,6 +91,17 @@ def health():
         'llm_type': type(llm_client).__name__
     })
 
+@app.route('/api/reset', methods=['POST'])
+def reset():
+    """Reset conversation context (start a new conversation)"""
+    try:
+        global llm_client
+        llm_client = get_llm_client()
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error resetting conversation: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/test')
 def test():
     """Test route to verify Flask is working"""
