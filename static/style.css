@@ -115,8 +115,29 @@ body {
 .voice-controls {
 	display: flex;
 	justify-content: center;
+	align-items: center;
+	gap: 12px;
+	width: 100%;
+	margin-top: 12px;
 }
 
+.control-btn {
+	width: 48px;
+	height: 48px;
+	border-radius: 10px;
+	border: 1px solid var(--border);
+	background: var(--bg-tertiary);
+	color: var(--text-primary);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s ease;
+}
+.control-btn:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 20px rgba(99, 102, 241, 0.25);
+}
 .animation-container {
     display: flex;
     flex-direction: column;
@@ -295,6 +316,26 @@ body {
 .voice-btn svg, .send-btn svg {
     width: 24px;
     height: 24px;
+}
+
+/* Generic control button (mute/next) */
+.control-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+.control-btn.active {
+    background: var(--error);
+    border-color: transparent;
+    color: #fff;
 }
 
 /* Scrollbar Styling */

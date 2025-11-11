@@ -8,6 +8,8 @@ let synth = window.speechSynthesis;
 // State management
 let isListening = false;
 let isSpeaking = false;
+let isPaused = false;
+let isMuted = false;
 
 // Initialize UI
 async function initUI() {
@@ -26,6 +28,13 @@ async function initUI() {
 	function switchTab(tab) {
 		currentTab = tab;
 		if (tab === 'voice') {
+			// ensure TTS is enabled on Voice tab
+			isMuted = false;
+			const muteBtnEl = document.getElementById('mute-btn');
+			if (muteBtnEl) {
+				muteBtnEl.classList.remove('active');
+				muteBtnEl.title = 'Mute audio (TTS)';
+			}
 			tabVoice.classList.add('active');
 			tabChat.classList.remove('active');
 			voicePane.classList.add('active');
@@ -67,19 +76,16 @@ async function updateAnimation(state) {
 		case 'listening':
 			if (mp && img.src !== mp) img.src = mp;
 			img.style.display = 'block';
-			if (vb) vb.style.visibility = 'hidden';
-			if (vb) vb.style.pointerEvents = 'none';
+			if (vb) vb.style.display = 'none';
 			break;
 		case 'speaking':
 			if (sp && img.src !== sp) img.src = sp;
 			img.style.display = 'block';
-			if (vb) vb.style.visibility = 'hidden';
-			if (vb) vb.style.pointerEvents = 'none';
+			if (vb) vb.style.display = 'none';
 			break;
 		default:
 			img.style.display = 'none';
-			if (vb) vb.style.visibility = 'visible';
-			if (vb) vb.style.pointerEvents = 'auto';
+			if (vb) vb.style.display = 'inline-flex';
 			break;
 	}
 }
@@ -132,18 +138,28 @@ function initSpeechRecognition() {
 // Send message to API
 async function sendMessage(message) {
     if (!message.trim()) return;
+
+	// If currently speaking, cancel so the user can ask mid-answer
+	if (synth) { try { synth.cancel(); } catch(e) {} }
+	isSpeaking = false;
+	isPaused = false;
     
-	// Add user message only if in chat tab
-	if (currentTab === 'chat') {
-		addMessage(message, 'user');
+	// Remove any existing loading messages first
+	const existingLoading = document.querySelector('.message .loading');
+	if (existingLoading) {
+		const loadingMsg = existingLoading.closest('.message');
+		if (loadingMsg) loadingMsg.remove();
 	}
+    
+	// Always append user message to chat history immediately (even if on Voice tab)
+	addMessage(message, 'user');
     
     // Clear input
 	const inputEl = document.getElementById('text-input');
 	if (inputEl) inputEl.value = '';
     
-    // Show loading
-	const loadingId = currentTab === 'chat' ? addMessage('Thinking...', 'bot', true) : null;
+    // Show loading indicator in chat tab
+	const loadingId = currentTab === 'chat' ? addMessage('bot', true) : null;
     
     try {
         const response = await fetch('/api/chat', {
@@ -160,21 +176,16 @@ async function sendMessage(message) {
 		if (loadingId) removeMessage(loadingId);
         
         if (data.success) {
-			if (currentTab === 'chat') {
-				addMessage(data.response, 'bot');
-			}
+			// Always append assistant message to chat
+			addMessage(data.response, 'bot');
             speakText(data.response);
         } else {
-			if (currentTab === 'chat') {
-				addMessage('Sorry, I encountered an error. Please try again.', 'bot');
-			}
+			addMessage('Sorry, I encountered an error. Please try again.', 'bot');
         }
     } catch (error) {
         console.error('Error:', error);
 		if (loadingId) removeMessage(loadingId);
-		if (currentTab === 'chat') {
-			addMessage('Sorry, I encountered an error. Please try again.', 'bot');
-		}
+		addMessage('Sorry, I encountered an error. Please try again.', 'bot');
     }
 }
 
@@ -214,14 +225,25 @@ function removeMessage(messageId) {
 // Speak text using Web Speech API
 function speakText(text) {
     if (!synth) return;
+	if (isMuted) {
+		updateAnimation('idle');
+		return;
+	}
     
     // Stop any ongoing speech
     synth.cancel();
+
+	// Clean markdown/symbols before speaking to avoid reading asterisks etc.
+	const spokenText = sanitizeForSpeech(text);
     
     updateAnimation('speaking');
     isSpeaking = true;
+	isPaused = false;
+	// Show next control
+	const nextBtn = document.getElementById('next-btn');
+	if (nextBtn) { nextBtn.style.display = 'inline-flex'; }
     
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance = new SpeechSynthesisUtterance(spokenText);
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
@@ -229,16 +251,34 @@ function speakText(text) {
     utterance.onend = () => {
         isSpeaking = false;
         updateAnimation('idle');
+		if (nextBtn) nextBtn.style.display = 'none';
     };
     
     utterance.onerror = () => {
         isSpeaking = false;
         updateAnimation('idle');
+		if (nextBtn) nextBtn.style.display = 'none';
     };
     
     synth.speak(utterance);
 }
 
+// Remove basic markdown/markup so TTS doesn't speak symbols like * or `
+function sanitizeForSpeech(input) {
+	if (!input) return "";
+	let t = String(input);
+	// Convert markdown links [text](url) -> text
+	t = t.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '$1');
+	// Strip inline code/backticks
+	t = t.replace(/`{1,3}([^`]+)`{1,3}/g, '$1');
+	// Strip bold/italic asterisks or underscores ***text***, **text**, *text*, _text_
+	t = t.replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1').replace(/_{1,3}([^_]+)_{1,3}/g, '$1');
+	// Remove remaining markdown bullets and headers at line starts
+	t = t.replace(/^\s*[-*+#>]\s+/gm, '');
+	// Collapse multiple spaces/newlines
+	t = t.replace(/[ \t]{2,}/g, ' ').replace(/\n{2,}/g, '\n').trim();
+	return t;
+}
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
 	initUI();
@@ -246,14 +286,43 @@ document.addEventListener('DOMContentLoaded', () => {
 	// Ensure the voice GIF is hidden until listening/speaking
 	updateAnimation('idle');
     
-    // Voice button
-    document.getElementById('voice-btn').addEventListener('click', () => {
-        if (isListening) {
-            recognition.stop();
-        } else {
-            recognition.start();
-        }
-    });
+	// Voice button
+	document.getElementById('voice-btn').addEventListener('click', () => {
+		// barge-in during speaking
+		if (isSpeaking && synth) {
+			try { synth.cancel(); } catch(e) {}
+			isSpeaking = false;
+			isPaused = false;
+		}
+		if (isListening) {
+			recognition.stop();
+		} else {
+			recognition.start();
+		}
+	});
+
+	// Skip current speech and immediately listen
+	const nextBtn = document.getElementById('next-btn');
+	if (nextBtn) {
+		nextBtn.addEventListener('click', () => {
+			if (synth) { try { synth.cancel(); } catch(e) {} }
+			isSpeaking = false;
+			isPaused = false;
+			updateAnimation('listening');
+			recognition.start();
+		});
+	}
+
+	// Mute/Unmute TTS on Chat
+	const muteBtn = document.getElementById('mute-btn');
+	if (muteBtn) {
+		muteBtn.addEventListener('click', () => {
+			isMuted = !isMuted;
+			if (isMuted && synth) { try { synth.cancel(); } catch(e) {} }
+			muteBtn.classList.toggle('active', isMuted);
+			muteBtn.title = isMuted ? 'Unmute audio (TTS)' : 'Mute audio (TTS)';
+		});
+	}
     
     // Send button
     document.getElementById('send-btn').addEventListener('click', () => {
