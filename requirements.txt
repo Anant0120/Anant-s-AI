@@ -2,9 +2,6 @@ groq
 openai
 flask
 flask-cors
-speechrecognition
-pyttsx3
-pyaudio
 python-dotenv
 requests
 gunicorn

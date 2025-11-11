@@ -1,8 +1,9 @@
 """
 AI Voice Bot - Responds to questions using voice input/output and LLM API
+
+Note: Audio libraries are imported lazily inside the VoiceBot class so that
+server deployments (e.g., Render) don't need pyaudio/pyttsx3 installed.
 """
-import speech_recognition as sr
-import pyttsx3
 import sys
 from config import (
     GROQ_API_KEY,
@@ -18,9 +19,18 @@ from config import (
 class VoiceBot:
     def __init__(self):
         """Initialize the voice bot with speech recognition and text-to-speech"""
-        self.recognizer = sr.Recognizer()
-        self.microphone = sr.Microphone()
-        self.tts_engine = pyttsx3.init()
+        try:
+            import speech_recognition as sr  # type: ignore
+            import pyttsx3  # type: ignore
+            self._sr = sr
+            self.recognizer = sr.Recognizer()
+            self.microphone = sr.Microphone()
+            self.tts_engine = pyttsx3.init()
+        except Exception as e:
+            raise RuntimeError(
+                "Voice mode requires local audio dependencies. "
+                "Please install: speechrecognition, pyttsx3, pyaudio"
+            ) from e
         
         # Configure TTS
         self.tts_engine.setProperty('rate', VOICE_SPEED)
@@ -85,13 +95,13 @@ class VoiceBot:
                 text = self.recognizer.recognize_google(audio)
                 print(f"You said: {text}")
                 return text
-            except sr.WaitTimeoutError:
+            except self._sr.WaitTimeoutError:
                 print("No speech detected. Please try again.")
                 return None
-            except sr.UnknownValueError:
+            except self._sr.UnknownValueError:
                 print("Could not understand audio. Please try again.")
                 return None
-            except sr.RequestError as e:
+            except self._sr.RequestError as e:
                 print(f"Error with speech recognition service: {e}")
                 return None
     
