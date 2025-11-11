@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Anant's AI Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+			<h1>Anant's AI</h1>
+			<p class="subtitle">Voice and Chat</p>
+        </div>
+
+        <div class="main-content">
+			<!-- Tabs -->
+			<div class="tabs">
+				<button id="tab-voice" class="tab active">Voice</button>
+				<button id="tab-chat" class="tab">Chat</button>
+			</div>
+
+			<!-- Voice Pane (default) - no text, only mic and GIF -->
+			<div id="voice-pane" class="pane active">
+				<div class="voice-stage">
+					<img 
+						id="voice-gif" 
+						alt="voice-state" 
+						class="voice-gif" 
+						data-mp="{{ url_for('static', filename='mp.gif') }}"
+						data-sp="{{ url_for('static', filename='sp.gif') }}"
+					/>
+
+					<div class="voice-controls">
+						<button id="voice-btn" class="voice-btn" title="Click to speak">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+								<path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+								<line x1="12" y1="19" x2="12" y2="23"></line>
+								<line x1="8" y1="23" x2="16" y2="23"></line>
+							</svg>
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Chat Pane -->
+			<div id="chat-pane" class="pane">
+				<!-- Animation Container (kept for chat aesthetics if needed) -->
+				<div class="animation-container">
+					<canvas id="dotlottie-canvas" class="lottie-animation" width="300" height="300"></canvas>
+				</div>
+
+				<!-- Chat Container -->
+				<div class="chat-container">
+					<div class="chat-messages" id="chat-messages"></div>
+				</div>
+
+            <!-- Input Section -->
+				<div class="input-section">
+					<div class="input-container">
+						<input 
+							type="text" 
+							id="text-input" 
+							placeholder="Type your question or click the mic to speak..."
+							class="text-input"
+						>
+						<button id="send-btn" class="send-btn" title="Send message">
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<line x1="22" y1="2" x2="11" y2="13"></line>
+								<polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+							</svg>
+						</button>
+					</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+
