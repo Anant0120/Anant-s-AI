@@ -5,12 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Anant's AI Assistant</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-    <div class="container">
+    <!-- Welcome Page (Shown First) -->
+    <div id="welcome-page" class="welcome-container">
+        <div class="welcome-content">
+            <h1 class="welcome-title">Welcome to Anant's AI</h1>
+            <p class="welcome-subtitle"></p>
+            
+            <div class="features-section">
+                <h2>What You Can Do</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">💬</div>
+                        <h3>Chat with Anant</h3>
+                        <p>Ask questions about Anant's background, experience, skills, and projects. Get instant, personalized responses.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎤</div>
+                        <h3>Voice Conversations</h3>
+                        <p>Have natural, hands-free conversations using voice. Click the mic and start talking - it's that simple!</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📅</div>
+                        <h3>Book a Meeting</h3>
+                        <p>Like what you see? Book a slot to meet with Anant. Get a Google Meet link sent directly to your email.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <h3>AI-Powered</h3>
+                        <p>Powered by advanced AI to provide authentic, thoughtful responses just like talking to Anant himself.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="example-questions">
+                <h2>Example Questions You Can Ask</h2>
+                <div class="questions-list-container">
+                    <div class="questions-list-wrapper">
+                        <div class="question-item">"Tell me about your experience in AI"</div>
+                        <div class="question-item">"What projects have you worked on?"</div>
+                        <div class="question-item">"What's your background in software engineering?"</div>
+                        <div class="question-item">"I want to book a meeting with you"</div>
+                        <div class="question-item">"What technologies are you skilled in?"</div>
+                        <!-- Duplicate for seamless loop -->
+                        <div class="question-item">"Tell me about your experience in AI"</div>
+                        <div class="question-item">"What projects have you worked on?"</div>
+                        <div class="question-item">"What's your background in software engineering?"</div>
+                        <div class="question-item">"I want to book a meeting with you"</div>
+                        <div class="question-item">"What technologies are you skilled in?"</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="auth-section">
+                <h2>Get Started</h2>
+                <p>Sign in with your Gmail account to continue</p>
+                <div id="google-signin-welcome"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App (Shown After Authentication) -->
+    <div id="main-app" class="container" style="display: none;">
         <div class="header">
 			<h1>Anant's AI</h1>
 			<p class="subtitle">Voice and Chat</p>
+			<div class="user-header-info">
+				<img id="user-picture" src="" alt="User" class="user-avatar">
+				<span id="user-name" class="user-name"></span>
+				<button id="logout-btn" class="logout-btn" title="Logout">Logout</button>
+			</div>
         </div>
 
         <div class="main-content">
@@ -88,6 +154,7 @@
 					</div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 
