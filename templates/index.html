@@ -70,8 +70,10 @@
     <!-- Main App (Shown After Authentication) -->
     <div id="main-app" class="container" style="display: none;">
         <div class="header">
-			<h1>Anant's AI</h1>
-			<p class="subtitle">Voice and Chat</p>
+            <div class="header-left">
+			    <h1>Anant's AI</h1>
+			    <p class="subtitle">Voice and Chat</p>
+            </div>
 			<div class="user-header-info">
 				<img id="user-picture" src="" alt="User" class="user-avatar">
 				<span id="user-name" class="user-name"></span>
@@ -82,13 +84,13 @@
         <div class="main-content">
 			<!-- Tabs -->
 			<div class="tabs">
-				<button id="tab-voice" class="tab active">Voice</button>
-				<button id="tab-chat" class="tab">Chat</button>
+				<button id="tab-voice" class="tab">Voice</button>
+				<button id="tab-chat" class="tab active">Chat</button>
 				<button id="new-btn" class="tab" style="margin-left:auto;" title="Start new conversation">New</button>
 			</div>
 
-			<!-- Voice Pane (default) - no text, only mic and GIF -->
-			<div id="voice-pane" class="pane active">
+			<!-- Voice Pane -->
+			<div id="voice-pane" class="pane">
 				<div class="voice-stage">
 					<img 
 						id="voice-gif" 
@@ -117,8 +119,8 @@
 				</div>
 			</div>
 
-			<!-- Chat Pane -->
-			<div id="chat-pane" class="pane">
+			<!-- Chat Pane (default) -->
+			<div id="chat-pane" class="pane active">
 				<!-- Animation Container (kept for chat aesthetics if needed) -->
 				<div class="animation-container">
 					<canvas id="dotlottie-canvas" class="lottie-animation" width="300" height="300"></canvas>

@@ -1,5 +1,6 @@
 // Tabs and GIF-based voice state (using local mp.gif and sp.gif)
-let currentTab = 'voice';
+// Default to Chat tab (GPT-style text chat first)
+let currentTab = 'chat';
 
 // Speech recognition and synthesis
 let recognition = null;
@@ -9,7 +10,8 @@ let synth = window.speechSynthesis;
 let isListening = false;
 let isSpeaking = false;
 let isPaused = false;
-let isMuted = false;
+// Start muted by default in Chat (user can unmute TTS)
+let isMuted = true;
 let ttsPrimed = false; // Track if TTS has been unlocked on mobile
 let voiceSessionActive = false; // When true, mic click starts/stops a live back-and-forth session
 
@@ -57,6 +59,9 @@ async function initUI() {
 			voicePane.classList.remove('active');
 		}
 	}
+
+	// Ensure initial state matches default tab
+	switchTab(currentTab);
 }
 
 async function resetConversation() {
@@ -73,9 +78,9 @@ async function resetConversation() {
 	} catch (e) {
 		console.warn('Reset failed:', e);
 	}
-	// go back to Voice tab as default
-	const tv = document.getElementById('tab-voice');
-	if (tv) tv.click();
+	// go back to Chat tab as default
+	const tc = document.getElementById('tab-chat');
+	if (tc) tc.click();
 }
 
 function preloadVoiceGifs() {
@@ -224,8 +229,8 @@ async function sendMessage(message) {
 	const inputEl = document.getElementById('text-input');
 	if (inputEl) inputEl.value = '';
     
-    // Show loading indicator in chat tab
-	const loadingId = currentTab === 'chat' ? addMessage('bot', true) : null;
+    // No separate loading bubble – just show user question and then assistant reply (ChatGPT-style)
+	const loadingId = null;
     
     try {
         const response = await fetch('/api/chat', {
@@ -238,9 +243,6 @@ async function sendMessage(message) {
         
         const data = await response.json();
         
-        // Remove loading message
-		if (loadingId) removeMessage(loadingId);
-        
         if (data.success) {
 			// Always append assistant message to chat
 			addMessage(data.response, 'bot');
@@ -250,7 +252,6 @@ async function sendMessage(message) {
         }
     } catch (error) {
         console.error('Error:', error);
-		if (loadingId) removeMessage(loadingId);
 		addMessage('Sorry, I encountered an error. Please try again.', 'bot');
     }
 }
@@ -644,6 +645,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			muteBtn.classList.toggle('active', isMuted);
 			muteBtn.title = isMuted ? 'Unmute audio (TTS)' : 'Mute audio (TTS)';
 		});
+
+		// Set initial visual state based on default mute setting
+		muteBtn.classList.toggle('active', isMuted);
+		muteBtn.title = isMuted ? 'Unmute audio (TTS)' : 'Mute audio (TTS)';
 	}
     
     // Send button
