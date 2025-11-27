@@ -176,7 +176,8 @@ class GroqClient:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=self.conversation_history,
-                max_tokens=200,
+                # Allow longer answers so responses are not cut off mid-sentence
+                max_tokens=800,
                 temperature=0.7
             )
             
@@ -219,7 +220,8 @@ class OpenAIClient:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=self.conversation_history,
-                max_tokens=200,
+                # Allow longer answers so responses are not cut off mid-sentence
+                max_tokens=800,
                 temperature=0.7
             )
             
@@ -256,7 +258,14 @@ class HuggingFaceClient:
             # Format prompt for text generation
             prompt = f"{self.conversation_context}\n\nUser: {question}\nAssistant:"
             
-            payload = {"inputs": prompt, "parameters": {"max_new_tokens": 150, "return_full_text": False}}
+            payload = {
+                "inputs": prompt,
+                "parameters": {
+                    # Allow longer generations for detailed answers
+                    "max_new_tokens": 512,
+                    "return_full_text": False
+                }
+            }
             
             response = requests.post(self.api_url, headers=self.headers, json=payload, timeout=30)
             
